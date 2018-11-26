@@ -1,11 +1,19 @@
 import scrapy
 
+print("=====SEJA BEM VINDO AO CRAWLER PARA O MERCADO LIVRE")
+linkCrawl = input("=====DIGITE O ITEM QUE DESEJA BUSCAR: ")
+print("So um momento, estamos procurando por " + linkCrawl + "...")
 
-class QuotesSpider(scrapy.Spider):
-    name = "mlcel"
+
+
+
+
+class MLSpider(scrapy.Spider):
+    name = "mlspider"
 
     def start_requests(self):
-        urls = ["https://lista.mercadolivre.com.br/celular#D[A:celular]"
+        urls = ["https://celulares.mercadolivre.com.br/celular",
+                "https://lista.mercadolivre.com.br/geladeiras#D[A:geladeiras]"
         ]
         for url in urls:
             yield scrapy.Request(url=url, callback=self.parse)
@@ -20,7 +28,11 @@ class QuotesSpider(scrapy.Spider):
     def parse_item(self, response):
         self.logger.info('Hi, this is an item page! %s', response.url)
         item = scrapy.Item()
-        item['id'] = response.xpath('//td[@id="item_id"]/text()').re(r'ID: (\d+)')
-        item['name'] = response.xpath('//td[@id="item_name"]/text()').extract()
-        item['description'] = response.xpath('//td[@id="item_description"]/text()').extract()
+        item['Imagem'] = response.xpath('.//div[contains(@class, "image-content")]/a/@href').extract()
+        item['Nome'] = response.xpath('//ol//div/h2/a/span/text()').extract()
+        item['Price'] = response.xpath('//ol//div/div/span[@class="price__fraction"]/text()').extract()
+        item['Desconto'] = response.xpath('.//div[contains(@class, "item__discount")]/text()').extract()
+        item['Vendedor'] = response.xpath('//div[contains(@class,"item__brand")]//span/text()').extract()
+        item['ItensVendidos'] = response.xpath('.//div[contains(@class,"item__condition")]/text()').extract()
+        item['InfoAdicional'] = response.xpath('.//p[contains(@class, "stack-item-info")]/text()').extract()
         return item
